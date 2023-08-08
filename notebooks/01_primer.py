@@ -3,8 +3,6 @@
 # MAGIC
 # MAGIC ## Prompt Engineering with LLMs on Databricks
 # MAGIC
-# MAGIC In this notebook, we run some tests with small scale LLMs (1b parameters or less), where we mainly run **Prompt Engineering** experiments with **Zero Shot Learning**.
-# MAGIC
 # MAGIC Before we start with Prompt Engineering, let's understand some common LLM Settings which can be used to tweak our generation capabilities.
 # MAGIC
 # MAGIC * **Temperature**: In short, the lower the `temperature`, the more *deterministic* the results. Conversely, higher temperature values might lead to more randomness - which can be desired for more creative outputs.
