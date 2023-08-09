@@ -9,7 +9,8 @@
 # MAGIC   * **Low Temperature**: you might want to use lower temperature values for fact-based QA in order to increase the chances of correct and concise responses.
 # MAGIC   * **High Temperature**: For creative tasks, such as script and novel writing, higher temperature values might be useful.
 # MAGIC
-# MAGIC * **top_p**: Similarly to `temperature`, use lower values in case you are looking for more deterministic responses, and higher values otherwise.
+# MAGIC * **top_k**: K in this case indicates the number of samples that we will take amongst generated tokens, where tokens are sorted in descending order according to their probability. Same as with `temperature`, the lower the value of K, the more deterministic our output tends to be.
+# MAGIC * **top_p**: Similarly to `temperature`, use lower values in case you are looking for more deterministic responses, and higher values otherwise. In this case, *p* is a cumulative probability value, so \\(0 < p <= 1\\)
 
 # COMMAND ----------
 
