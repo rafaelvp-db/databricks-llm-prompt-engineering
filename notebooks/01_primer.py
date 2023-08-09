@@ -3,6 +3,18 @@
 # MAGIC
 # MAGIC ## Prompt Engineering with LLMs on Databricks
 # MAGIC
+# MAGIC <hr />
+# MAGIC
+# MAGIC <img src="https://imageio.forbes.com/specials-images/imageserve/645c8a0c17d25e16f92796dd/0x0.jpg?format=jpg&width=1200" />
+# MAGIC
+# MAGIC <hr />
+# MAGIC
+# MAGIC ### Intro
+# MAGIC
+# MAGIC [Prompt engineering](https://en.wikipedia.org/wiki/Prompt_engineering) or prompting is the process of structuring sentences so that they can be interpreted and understood by a [Large Language Model (LLM)](https://www.databricks.com/resources/ebook/tap-full-potential-llm) in such a way that its output is in accord with the user's intentions. A prompt can be a description of a desired output, such as `as write a limerick about chickens` or `What is the capital of Lithuania?`.
+# MAGIC
+# MAGIC #### Parameters
+# MAGIC
 # MAGIC Before we start with Prompt Engineering, let's understand some common LLM Settings which can be used to tweak our generation capabilities.
 # MAGIC
 # MAGIC * **Temperature**: In short, the lower the `temperature`, the more *deterministic* the results. Conversely, higher temperature values might lead to more randomness - which can be desired for more creative outputs.
@@ -79,7 +91,3 @@
 # MAGIC
 # MAGIC * [Prompt Engineering Guide](https://www.promptingguide.ai/)
 # MAGIC * [Token Selection Strategies: Top-K, Top-p and Temperature](https://peterchng.com/blog/2023/05/02/token-selection-strategies-top-k-top-p-and-temperature/)
-
-# COMMAND ----------
-
-
