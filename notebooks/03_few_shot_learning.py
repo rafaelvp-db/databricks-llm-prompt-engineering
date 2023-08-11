@@ -1,4 +1,13 @@
 # Databricks notebook source
+# MAGIC %md
+# MAGIC
+# MAGIC ## Few Shot Learning
+# MAGIC
+# MAGIC TODO: add more text / explanations
+
+# COMMAND ----------
+
+# DBTITLE 1,Installing Dependencies
 # MAGIC %pip install xformers==0.0.20 einops==0.6.1 flash-attn==v1.0.3.post0 triton-pre-mlir@git+https://github.com/vchiley/triton.git@triton_pre_mlir#subdirectory=python
 
 # COMMAND ----------
@@ -39,6 +48,7 @@ generator = transformers.pipeline(
 
 # COMMAND ----------
 
+# DBTITLE 1,Declaring our Generation Wrapper Function
 import re
 
 def generate_text(prompt, **kwargs):
@@ -73,20 +83,16 @@ def postprocess(response: str):
 
 # COMMAND ----------
 
+# DBTITLE 1,Downloading our Dataset from Hugging Face
 import datasets
 
-# COMMAND ----------
-
 ds = datasets.load_dataset("bitext/customer-support-intent-dataset")
-
-# COMMAND ----------
-
 df = ds["train"].to_pandas()
 display(df)
 
 # COMMAND ----------
 
-# DBTITLE 1,Creating a sampled dataset
+# DBTITLE 1,Creating a sampled dataset for Few Shot Examples
 import pandas as pd
 
 df_arr = []
@@ -97,11 +103,6 @@ for intent in df.intent.unique()[:10]:
 
 df_sampled = pd.concat(df_arr, axis = 0)
 display(df_sampled)
-
-# COMMAND ----------
-
-sample_dict_arr = df_sampled.loc[:, ["utterance", "intent"]].to_dict(orient="records")
-sample_dict_arr[:5]
 
 # COMMAND ----------
 
@@ -124,7 +125,3 @@ formatted_prompt = prompt.format(
 
 response = generate_text(prompt = formatted_prompt)
 print(response)
-
-# COMMAND ----------
-
-
