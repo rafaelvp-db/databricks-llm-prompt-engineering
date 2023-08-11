@@ -2,7 +2,7 @@
 
 <img src="https://github.com/rafaelvp-db/databricks-llm-workshop/blob/main/img/header.png?raw=true" />
 
-## Credits
+## Credits & Reference
 
 * [Rafael Pierre](https://github.com/rafaelvp-db)
 * [Daniel Liden](https://github.com/djliden)
