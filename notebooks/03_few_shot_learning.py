@@ -53,7 +53,7 @@ import re
 
 def generate_text(prompt, **kwargs):
   if "max_new_tokens" not in kwargs:
-    kwargs["max_new_tokens"] = 512
+    kwargs["max_new_tokens"] = 100
   
   kwargs.update(
         {
@@ -83,7 +83,7 @@ def postprocess(response: str):
 
 # COMMAND ----------
 
-# DBTITLE 1,Downloading our Dataset from Hugging Face
+# DBTITLE 1,Downloading our Dataset from Hugging Face and Saving to Dclta
 import datasets
 
 ds = datasets.load_dataset("bitext/customer-support-intent-dataset")
