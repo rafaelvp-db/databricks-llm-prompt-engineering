@@ -170,8 +170,16 @@ def generate_text(prompt, **kwargs):
 # MAGIC %md
 # MAGIC
 # MAGIC ## The Dataset
+# MAGIC <br/>
 # MAGIC
-# MAGIC For this **intent classification** example, we will use a **customer support intent dataset** from Hugging Face.
+# MAGIC * For this **intent classification** example, we will use a **customer support intent dataset** from Hugging Face.
+# MAGIC * Once we have downloaded it, we will save it as Delta Table, so that we don't need to download it again. That will also allow us to have it in optimized format should we want to do any preprocessing, visualization etc.
+
+# COMMAND ----------
+
+# MAGIC %sql
+# MAGIC
+# MAGIC CREATE DATABASE IF NOT EXISTS prompt_engineering
 
 # COMMAND ----------
 
@@ -180,6 +188,9 @@ import datasets
 
 ds = datasets.load_dataset("bitext/customer-support-intent-dataset")
 df = ds["train"].to_pandas()
+
+sdf = spark.createDataFrame(df)
+sdf.write.saveAsTable("prompt_engineering.customer_support_intent", mode = "overwrite")
 
 #Take a small, random sample from this dataset and display it
 display(df.sample(frac=0.2, random_state = 123).head(10))
@@ -219,13 +230,14 @@ def get_top_intents_samples(df, k = 10, random_state = 123, n_samples = 5):
 
 df_train = get_top_intents_samples(
   df = df,
-  random_state = 123
+  random_state = 123,
+  n_samples = 3
 )
 
 df_test = get_top_intents_samples(
   df = df[~np.isin(df.index, df_train.index)],
   random_state = 234,
-  n_samples = 3
+  n_samples = 5
 )
 
 # COMMAND ----------
@@ -233,32 +245,47 @@ df_test = get_top_intents_samples(
 # DBTITLE 1,Creating Prompts using Few Shot Learning
 import tqdm
 
-prompt = """
-  In a dataset, we have 10 different intents.
-  Below you will find an array containing three examples of utterances for each of these intents. Each example is in JSON format:
-  {examples}
-  Based on the examples above, return a JSON object with the actual utterance, and the right intent for that utterance. Please include only one of the intents listed above.
-  {utterance}
-"""
+def train_predict(prompt_template, df_train, df_test):
 
-sample_dict_arr = df_train.to_dict(orient="records")
-examples = sample_dict_arr
+  sample_dict_arr = df_train.to_dict(orient="records")
+  examples = sample_dict_arr
 
-utterances = df_test.utterance.values
-intents = df_test.intent.values
-utterances_intents = list(zip(utterances, intents))
-result = []
+  utterances = df_test.utterance.values
+  intents = df_test.intent.values
+  utterances_intents = list(zip(utterances, intents))
+  result = []
 
-for utterance_intent in tqdm.tqdm(utterances_intents):
+  for utterance_intent in tqdm.tqdm(utterances_intents):
 
-  formatted_prompt = prompt.format(
-    examples = examples,
-    utterance = utterance_intent[0]
-  )
+    formatted_prompt = prompt_template.format(
+      intents = df_train.intent.unique(),
+      examples = examples,
+      utterance = utterance_intent[0]
+    )
 
-  response = generate_text(prompt = formatted_prompt)
-  response["actual_intent"] = utterance_intent[1]
-  result.append(response)
+    # Setting temperature = 0 and do_sample = False
+    # (to be as deterministic as possible)
+
+    response = generate_text(
+      prompt = formatted_prompt,
+      temperature = 0.1,
+      top_p = 0.15,
+      top_k = 5,
+      do_sample = True
+    )
+    response["actual_intent"] = utterance_intent[1]
+    result.append(response)
+
+  return result
+
+prompt_template = """
+    Below you will find an array containing three examples of utterances for each of these intents. Each example is in JSON format:
+    {examples}
+    Based on the examples above, return a JSON object with the actual utterance, and the right intent for the utterance below:
+    '{utterance}'
+  """
+
+result = train_predict(prompt_template, df_train, df_test)
 
 # COMMAND ----------
 
@@ -266,8 +293,12 @@ for utterance_intent in tqdm.tqdm(utterances_intents):
 from sklearn.metrics import classification_report
 
 result_df = pd.DataFrame.from_dict(result)
-classification_report = classification_report(result_df.actual_intent, result_df.intent)
-print(classification_report)
+report = classification_report(result_df.actual_intent, result_df.intent)
+print(report)
+
+# COMMAND ----------
+
+result_df[result_df.actual_intent == "change_address"]
 
 # COMMAND ----------
 
@@ -277,11 +308,38 @@ print(classification_report)
 # MAGIC
 # MAGIC <br/>
 # MAGIC
-# MAGIC * We were able to get a (weighted) F1 Score of 0.82, which is not bad at all!
+# MAGIC * We were able to get a (weighted) F1 Score of 0.93, which is not bad at all!
 # MAGIC * Still, for some classes/intents the score is really bad:
-# MAGIC   * `change_delivery_address`
-# MAGIC   * `contact_customer_service`
-# MAGIC * In the next notebook we'll investigate those cases, and also introduce other techniques, such as **Active Prompting**.
+# MAGIC   * `change_address`
+# MAGIC * If we look again at both our training and testing sets we'll realise that these intents are not even there.
+# MAGIC * Let's change our prompt, so that our model becomes more assertive in that sense.
+# MAGIC   * We'll surround our **utterances** with single quotes
+# MAGIC   * We'll also add a bit of text to try to make our generations more assertive
+
+# COMMAND ----------
+
+prompt_template = """
+    Below you will find an array containing three examples of utterances for each of these intents. Each example is in JSON format:
+    {examples}
+    Based on the examples above, return a JSON object with the actual utterance, and the right intent for the utterance below:
+    '{utterance}'
+    Make sure that your answer contains one of the intents below:
+    {intents}
+"""
+
+result = train_predict(prompt_template, df_train, df_test)
+
+# COMMAND ----------
+
+result_df = pd.DataFrame.from_dict(result)
+report = classification_report(result_df.actual_intent, result_df.intent)
+print(report)
+
+# COMMAND ----------
+
+# MAGIC %md
+# MAGIC
+# MAGIC * In the next notebook we'll investigate those cases, and also introduce other techniques, such as **Chain of Thought (CoT)** and **Active Prompting**.
 
 # COMMAND ----------
 
@@ -293,7 +351,3 @@ print(classification_report)
 # MAGIC
 # MAGIC * [Everything You Need to Know About Few-Shot Learning](https://blog.paperspace.com/few-shot-learning/)
 # MAGIC * [Few-Shot Prompting](https://www.promptingguide.ai/techniques/fewshot)
-
-# COMMAND ----------
-
-
