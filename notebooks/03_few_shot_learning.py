@@ -3,7 +3,48 @@
 # MAGIC
 # MAGIC ## Few Shot Learning
 # MAGIC
-# MAGIC TODO: add more text / explanations
+# MAGIC In Machine Learning, **Few Shot Learning** (FSL) is a Machine Learning framework that enables a pre-trained model to generalize over new categories of data (that the pre-trained model has not seen during training) using only a few labeled samples per class. It falls under the paradigm of meta-learning (meta-learning means learning to learn).
+# MAGIC
+# MAGIC Within **Prompt Engineering**, FSL is also known as **Few Shot Prompting** - you include some examples related to the task that you want the model to perform as part of your prompts.
+# MAGIC
+# MAGIC ### Few Shot Learning Example
+# MAGIC
+# MAGIC It can be tricky for LLMs to do sentiment analysis when there are aspects in the prompt such as *ambiguity* or *irony*.
+# MAGIC
+# MAGIC #### Sentiment Classification: Zero-Shot Learning
+# MAGIC
+# MAGIC Suppose you tried **Zero Shot Learning** for a **Sentiment Analysis** problem with an LLM of your choice. You noticed that the performance is below what you expect:
+# MAGIC
+# MAGIC * **Instruction**: *Please classify the following sentence as either POSITIVE or NEGATIVE, depending on the overall sentiment: "This movie is good, considering that you think it's good to sit in the movie theater sleeping for 2 hours."*
+# MAGIC * **LLM Answer**: POSITIVE (expected classification: NEGATIVE)
+# MAGIC
+# MAGIC #### Sentiment Classification: Few-Shot Learning
+# MAGIC
+# MAGIC You then try to provide some classification examples containing *irony*, so that the model is able to distinguish those and properly classify similar ones:
+# MAGIC <br/>
+# MAGIC <br/>
+# MAGIC
+# MAGIC * **Instruction**: *Given the following sentiment classification examples:*
+# MAGIC <br/>
+# MAGIC
+# MAGIC *'I liked this movie as much as I like standing in the rain' (NEGATIVE)*
+# MAGIC <br/>
+# MAGIC
+# MAGIC *'If you would like to spend 10 USD for nothing then this movie is good for you' (NEGATIVE)*
+# MAGIC
+# MAGIC *Please classify the following sentence as either POSITIVE, NEUTRAL or NEGATIVE, depending on the overall sentiment.*
+# MAGIC <br/>
+# MAGIC
+# MAGIC *"This movie is good, considering that you think it's good to sit in the movie theater sleeping for 2 hours."*
+# MAGIC <br/>
+# MAGIC <br/>
+# MAGIC * **LLM Answer**: NEGATIVE (expected classification: NEGATIVE)
+# MAGIC
+# MAGIC In the cells below, we will try to apply the same concept to an **intent classification** dataset. For this purpose, we will experiment with MosaicML's `mpt-7b-instruct` model.
+# MAGIC
+# MAGIC A potential caveat with Few Shot Learning is given all the few shot examples that we provide, our prompt might be larger than the maximum **context length** for a particular model. 
+# MAGIC
+# MAGIC MPT family of models allows you to configure maximum context window size, which mitigates this issue. Of course, it is also possible to extend context window sizes by fine tuning LLMs, but we want to skip that step for this exercise.
 
 # COMMAND ----------
 
@@ -47,6 +88,47 @@ generator = transformers.pipeline(
 
 # COMMAND ----------
 
+# MAGIC %md
+# MAGIC
+# MAGIC ## Output Formats
+# MAGIC
+# MAGIC Different LLMs have distinct behaviours when it comes to the output format.
+# MAGIC
+# MAGIC For instance, we might want to have our LLM return JSON-formatted outputs, so that we can easily transform these outputs into a Pandas or Spark DataFrame for persisting them somewhere later on and also evaluating the outputs.
+# MAGIC
+# MAGIC To simplify this, we will parse our LLM responses to JSON. To achieve this, we'll leverage [JSONFormer](https://github.com/1rgs/jsonformer), a nice, lightweight Python Package that parses JSON payloads from LLM outputs.
+# MAGIC
+# MAGIC Sample usage:
+# MAGIC
+# MAGIC ```python
+# MAGIC from jsonformer import Jsonformer
+# MAGIC from transformers import AutoModelForCausalLM, AutoTokenizer
+# MAGIC
+# MAGIC model = AutoModelForCausalLM.from_pretrained("databricks/dolly-v2-12b")
+# MAGIC tokenizer = AutoTokenizer.from_pretrained("databricks/dolly-v2-12b")
+# MAGIC
+# MAGIC json_schema = {
+# MAGIC     "type": "object",
+# MAGIC     "properties": {
+# MAGIC         "name": {"type": "string"},
+# MAGIC         "age": {"type": "number"},
+# MAGIC         "is_student": {"type": "boolean"},
+# MAGIC         "courses": {
+# MAGIC             "type": "array",
+# MAGIC             "items": {"type": "string"}
+# MAGIC         }
+# MAGIC     }
+# MAGIC }
+# MAGIC
+# MAGIC prompt = "Generate a person's information based on the following schema:"
+# MAGIC jsonformer = Jsonformer(model, tokenizer, json_schema, prompt)
+# MAGIC generated_data = jsonformer()
+# MAGIC
+# MAGIC print(generated_data)
+# MAGIC ```
+
+# COMMAND ----------
+
 # DBTITLE 1,Declaring our Generation Wrapper Function
 from jsonformer import Jsonformer
 
@@ -85,12 +167,35 @@ def generate_text(prompt, **kwargs):
 
 # COMMAND ----------
 
+# MAGIC %md
+# MAGIC
+# MAGIC ## The Dataset
+# MAGIC
+# MAGIC For this **intent classification** example, we will use a **customer support intent dataset** from Hugging Face.
+
+# COMMAND ----------
+
 # DBTITLE 1,Downloading our Dataset from Hugging Face and Saving to Dclta
 import datasets
 
 ds = datasets.load_dataset("bitext/customer-support-intent-dataset")
 df = ds["train"].to_pandas()
+
+#Take a small, random sample from this dataset and display it
 display(df.sample(frac=0.2, random_state = 123).head(10))
+
+# COMMAND ----------
+
+# MAGIC %md
+# MAGIC
+# MAGIC ## Selecting our Few Shot Examples
+# MAGIC <br/>
+# MAGIC
+# MAGIC * The dataset we're using contains multiple different intents.
+# MAGIC * For our experiment to be minimally successful, we need to provide at least some few shot examples for each and every intent.
+# MAGIC * For simplicity purposes, we will select the top 10 most frequent intents. Then, for each of these top 10 intents, we will randomly sample 5 different utterances/questions.
+# MAGIC * Concretely, our dataframe containing few shot examples will be our **training set** (although we're not really *training* our model per se; this will just be our convention).
+# MAGIC * The remaining part of our dataset will be our **testing set**, which we'll use to evaluate how our Few Shot experiment performs.
 
 # COMMAND ----------
 
@@ -152,13 +257,43 @@ for utterance_intent in tqdm.tqdm(utterances_intents):
   )
 
   response = generate_text(prompt = formatted_prompt)
-  output = f"""\n
-    utterance: {utterance}\n
-    predicted_intent: {response}\n
-    actual_intent: {utterance_intent[1]}
-  """
-  result.append(output)
+  response["actual_intent"] = utterance_intent[1]
+  result.append(response)
 
 # COMMAND ----------
 
-result
+# DBTITLE 1,Analysing Results
+from sklearn.metrics import classification_report
+
+result_df = pd.DataFrame.from_dict(result)
+classification_report = classification_report(result_df.actual_intent, result_df.intent)
+print(classification_report)
+
+# COMMAND ----------
+
+# MAGIC %md
+# MAGIC
+# MAGIC ### Results Evaluation
+# MAGIC
+# MAGIC <br/>
+# MAGIC
+# MAGIC * We were able to get a (weighted) F1 Score of 0.82, which is not bad at all!
+# MAGIC * Still, for some classes/intents the score is really bad:
+# MAGIC   * `change_delivery_address`
+# MAGIC   * `contact_customer_service`
+# MAGIC * In the next notebook we'll investigate those cases, and also introduce other techniques, such as **Active Prompting**.
+
+# COMMAND ----------
+
+# MAGIC %md
+# MAGIC
+# MAGIC ## Reference
+# MAGIC
+# MAGIC <hr />
+# MAGIC
+# MAGIC * [Everything You Need to Know About Few-Shot Learning](https://blog.paperspace.com/few-shot-learning/)
+# MAGIC * [Few-Shot Prompting](https://www.promptingguide.ai/techniques/fewshot)
+
+# COMMAND ----------
+
+
