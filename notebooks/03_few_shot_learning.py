@@ -339,7 +339,9 @@ print(report)
 
 # MAGIC %md
 # MAGIC
-# MAGIC * In the next notebook we'll investigate those cases, and also introduce other techniques, such as **Chain of Thought (CoT)** and **Active Prompting**.
+# MAGIC * Of course, this look super good 😀
+# MAGIC * We just need to have in mind that our testing set is quite limited - mainly for experimentation / latency purposes.
+# MAGIC * In the next notebook we'll expand our testing set, and also introduce other techniques, such as **Chain of Thought (CoT)** and **Active Prompting**.
 
 # COMMAND ----------
 

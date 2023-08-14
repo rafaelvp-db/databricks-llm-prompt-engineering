@@ -2,16 +2,22 @@
 # MAGIC %md
 # MAGIC
 # MAGIC ## Prompt Engineering Techniques
-# MAGIC ### Active Prompting & Prompting Ensemble
+# MAGIC ### Active Prompting & Chain-of-Thought (CoT)
 # MAGIC <hr/>
 # MAGIC
 # MAGIC ### Recap
 # MAGIC
 # MAGIC * In the last notebook, we achieved good results with Few Shot Learning
-# MAGIC * However, for some of the intents, performance was really bad:
-# MAGIC   * `change_delivery_address`
-# MAGIC   * `contact_customer_service`
-# MAGIC * Let's increase the number of samples for these two particular intents and see how that affects our overall performance
+# MAGIC * However, for some of the intents, performance was really bad.
+# MAGIC * Another limitation of our previous experiment is that we had a really small sample when building our testing set. We will increase the size a bit, so our results are more accurate.
+
+# COMMAND ----------
+
+# MAGIC %pip install triton-pre-mlir@git+https://github.com/vchiley/triton.git@triton_pre_mlir#subdirectory=python
+
+# COMMAND ----------
+
+dbutils.library.restartPython()
 
 # COMMAND ----------
 
@@ -23,24 +29,13 @@ df = sdf.toPandas()
 import pandas as pd
 import numpy as np
 
-def get_top_intents_samples(
-  df,
-  k = 10,
-  random_state = 123,
-  n_samples = 5,
-  active_intents = [],
-  active_prompt_factor = 2
-):
+def get_top_intents_samples(df, k = 10, random_state = 123, n_samples = 5):
   
   df_arr = []
 
   for intent in df.intent.unique()[:k]:
-    if intent not in active_intents:
-      active_prompt_factor = 1
-    
-    final_n_samples = n_samples * active_prompt_factor
     sample = df.loc[df.intent == intent, :].sample(
-      n = final_n_samples,
+      n = n_samples,
       random_state = random_state
     )
     df_arr.append(sample)
@@ -50,21 +45,23 @@ def get_top_intents_samples(
 
 df_train = get_top_intents_samples(
   df = df,
-  random_state = 123
+  random_state = 123,
+  n_samples = 3
 )
 
 df_test = get_top_intents_samples(
   df = df[~np.isin(df.index, df_train.index)],
   random_state = 234,
-  n_samples = 3,
+  n_samples = 20
 )
-
-print(f"Training Set - Unique Intents:\n{sorted(df_train.intent.unique())}")
-print(f"\nTesting Set - Unique Intents:\n{sorted(df_test.intent.unique())}")
 
 # COMMAND ----------
 
-# DBTITLE 1,Declaring and Configuring MPT-7b-Instruct
+df_test.shape
+
+# COMMAND ----------
+
+# DBTITLE 1,Declaring and Configuring MPT-7b
 import transformers
 import torch
 
@@ -77,7 +74,7 @@ config = transformers.AutoConfig.from_pretrained(
 )
 config.attn_config['attn_impl'] = 'triton'
 config.init_device = 'cuda'
-config.max_seq_len = 6000
+config.max_seq_len = 2048
 
 model = transformers.AutoModelForCausalLM.from_pretrained(
   name,
@@ -129,6 +126,114 @@ def generate_text(prompt, **kwargs):
   
   if isinstance(prompt, str):
     jsonformer = Jsonformer(model, tokenizer, json_schema, prompt)
+    response = jsonformer()
+
+  elif isinstance(prompt, list):
+    response = []
+    for prompt_ in prompt:
+      jsonformer = Jsonformer(model, tokenizer, json_schema, prompt_)
+      generated_text = jsonformer()
+      response.append(generated_text)
+
+  return response
+
+# COMMAND ----------
+
+# DBTITLE 1,Creating Prompts using Few Shot Learning
+import tqdm
+
+def train_predict(prompt_template, df_train, df_test):
+
+  sample_dict_arr = df_train.to_dict(orient="records")
+  examples = sample_dict_arr
+
+  utterances = df_test.utterance.values
+  intents = df_test.intent.values
+  utterances_intents = list(zip(utterances, intents))
+  result = []
+
+  for utterance_intent in tqdm.tqdm(utterances_intents):
+
+    formatted_prompt = prompt_template.format(
+      intents = df_train.intent.unique(),
+      examples = examples,
+      utterance = utterance_intent[0]
+    )
+
+    # Setting temperature = 0 and do_sample = False
+    # (to be as deterministic as possible)
+
+    response = generate_text(
+      prompt = formatted_prompt,
+      temperature = 0.1,
+      top_p = 0.15,
+      top_k = 5,
+      do_sample = True
+    )
+    response["actual_intent"] = utterance_intent[1]
+    result.append(response)
+
+  return result
+
+prompt_template = """
+    Below you will find an array containing three examples of utterances for each of these intents. Each example is in JSON format:
+    {examples}
+    Based on the examples above, return a JSON object with the actual utterance, and the right intent for the utterance below:
+    '{utterance}'
+  """
+
+result = train_predict(prompt_template, df_train, df_test)
+
+# COMMAND ----------
+
+# DBTITLE 1,Analysing Results
+from sklearn.metrics import classification_report
+
+result_df = pd.DataFrame.from_dict(result)
+report = classification_report(result_df.actual_intent, result_df.intent)
+print(report)
+
+# COMMAND ----------
+
+output[0].outputs[0].
+
+# COMMAND ----------
+
+# Print the outputs.
+for item in output:
+  prompt = item.prompt
+  generated_text = item.outputs[0].text
+  parsed = post_process_json(generated_text)
+  print(f"Generated text: {parsed}")
+
+# COMMAND ----------
+
+# DBTITLE 1,Adapting our Generation Wrapper Function
+from jsonformer import Jsonformer
+from vllm import SamplingParams
+
+def generate_text(prompt, **kwargs):
+
+  json_schema = {
+    "type": "object",
+    "properties": {
+      "utterance": {"type": "string"},
+      "intent": {"type": "string"}
+    }
+  }
+
+  if "max_new_tokens" not in kwargs:
+    kwargs["max_new_tokens"] = 100
+  
+  kwargs.update(
+    {
+      "pad_token_id": tokenizer.eos_token_id,
+      "eos_token_id": tokenizer.eos_token_id,
+    }
+  )
+  
+  if isinstance(prompt, str):
+    jsonformer = Jsonformer(llm, tokenizer, json_schema, prompt)
     response = jsonformer()
 
   elif isinstance(prompt, list):
