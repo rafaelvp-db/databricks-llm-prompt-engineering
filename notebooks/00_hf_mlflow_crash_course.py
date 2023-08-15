@@ -215,42 +215,21 @@ class TextClassificationPipelineModel(mlflow.pyfunc.PythonModel):
 
 from transformers import pipeline
 
-model_output_dir = "./intent_model"
-pipeline_output_dir = "./intent_pipeline"
+model_output_dir = "/tmp/intent_model"
+pipeline_output_dir = "/tmp/intent_pipeline"
 model_artifact_path = "intent_classification_model"
 
 with mlflow.start_run() as run:
   trainer.train()
   trainer.save_model(model_output_dir)
-  pipe = pipeline("text-classification", model=AutoModelForSequenceClassification.from_pretrained(model_output_dir), tokenizer=tokenizer)
+  pipe = pipeline(
+    "text-classification",
+    model=AutoModelForSequenceClassification.from_pretrained(model_output_dir),
+    tokenizer=tokenizer
+  )
   pipe.save_pretrained(pipeline_output_dir)
-  mlflow.transformers.log_model(transformers_model=pipe,
-                                artifact_path=model_artifact_path, 
-                                input_example="Hi there!",
-                               )
-
-# COMMAND ----------
-
-# MAGIC %md
-# MAGIC # Batch inference
-# MAGIC Load the model as a UDF using MLflow and use it for batch scoring.
-
-# COMMAND ----------
-
-logged_model = "runs:/{run_id}/{model_artifact_path}".format(run_id=run.info.run_id, model_artifact_path=model_artifact_path)
-
-# Load model as a Spark UDF. Override result_type if the model does not return double values.
-sms_spam_model_udf = mlflow.pyfunc.spark_udf(spark, model_uri=logged_model, result_type='string')
-
-test = test.select(test.text, test.label, sms_spam_model_udf(test.text).alias("prediction"))
-display(test)
-
-# COMMAND ----------
-
-# MAGIC %md
-# MAGIC # Cleanup
-# MAGIC Remove the files placed in DBFS.
-
-# COMMAND ----------
-
-dbutils.fs.rm(f"dbfs:{tutorial_path}", recurse=True)
+  mlflow.transformers.log_model(
+    transformers_model=pipe,
+    artifact_path=model_artifact_path, 
+    input_example="Hi there!",
+  )
