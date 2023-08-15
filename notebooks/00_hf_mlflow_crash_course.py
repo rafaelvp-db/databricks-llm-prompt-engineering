@@ -233,3 +233,20 @@ with mlflow.start_run() as run:
     artifact_path=model_artifact_path, 
     input_example="Hi there!",
   )
+
+# COMMAND ----------
+
+# DBTITLE 1,Inference
+import mlflow
+logged_model = 'runs:/f53cb5f163c04b3a91174fa01336cb03/intent_classification_model'
+
+# Load model as a PyFuncModel.
+loaded_model = mlflow.pyfunc.load_model(logged_model)
+
+# Predict on a Pandas DataFrame.
+import pandas as pd
+loaded_model.predict(ds["validation"].to_pandas())
+
+# COMMAND ----------
+
+
