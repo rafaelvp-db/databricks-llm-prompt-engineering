@@ -41,9 +41,10 @@ xformers==0.0.20
 ## Coming soon
 
 🔎 [Retrieval Augmented Generation (RAG)](https://www.promptingguide.ai/techniques/rag)
+<br/>
 🚀 [Model Deployment and Real Time Inference](https://docs.databricks.com/en/machine-learning/model-serving/index.html)
+<br/>
 🛣️ [MLflow AI Gateway](https://mlflow.org/docs/latest/gateway/index.html)
-
 
 ## Credits & Reference
 
