@@ -26,7 +26,9 @@ The repo is structured per different use cases. As of 18/08/2023, you will find 
 
 🙋🏻‍♂️ `customer_service`
   * For this use case, there are 5 different notebooks:
+  * 
 <br/>
+
 <t/>🤓 `00_hf_mlflow_crash_course`: provides a basic example using Hugging Face for training an intent classification model using `distilbert-qa`. Also showcases foundational concepts of MLflow, such as [experiment tracking](https://mlflow.org/docs/latest/tracking.html), [artifact logging](https://mlflow.org/docs/latest/python_api/mlflow.artifacts.html) and [model registration](https://mlflow.org/docs/latest/model-registry.html).
 <br/>
     🌡️ `01_primer`: mostly conceptual notebook. Contains explanations around Prompt Engineering, and foundational concepts such as **Top K** sampling, **Top p** sampling and **Temperature**.
