@@ -2,27 +2,9 @@
 
 <img src="https://github.com/rafaelvp-db/databricks-llm-workshop/blob/main/img/header.png?raw=true" />
 
-## Getting Started
-
-To start using this repo on Databricks, there are a few pre-requirements:
-
-1. Create a GPU Cluster, minimally with Databricks Machine Learning Runtime 13.2 and an NVIDIA T4 GPU (A100 is required for the steps involving VLLM).
-2. Configure the init script for the cluster. Once you clone this repo to your workspace, you can do so by pointing to the following path in the Init Script configuration: `/Repos/your_name@email.com/databricks-llm-prompt-engineering/init/init.sh`
-3. Install the following Python packages in your cluster:
-```bash
-accelerate==0.21.0
-einops==0.6.1
-flash-attn==v1.0.5
-ninja
-tokenizers==0.13.3
-transformers==4.30.2
-xformers==0.0.20
-```
-4. Once all dependencies finish installing, you should be good to go.
-
 ## Contents
 
-The repo is structured per different use cases. As of 18/08/2023, you will find the following examples in the `notebooks` folder:
+The repo is structured per different use cases related to Prompt Engineering and LLMs. As of 18/08/2023, you will find the following examples in the `notebooks` folder:
 
 🙋🏻‍♂️ `customer_service`
 
@@ -37,6 +19,26 @@ For this use case, there are 5 different notebooks:
 💉 `03_few_shot_learning`: here we explore Few Shot Learning for a sequence classification use case using [mpt-7b-instruct](https://huggingface.co/mosaicml/mpt-7b-instruct).
 
 🏃🏻‍♂️ `04_active_prompting`: in this notebook, we explore active learning techniques. Additionally, we demonstrate how to leverage [VLLM](https://vllm.readthedocs.io/en/latest/) in order to achieve 7X - 10X inference latency improvements.
+
+## Getting Started
+
+To start using this repo on Databricks, there are a few pre-requirements:
+
+1. Create a GPU Cluster, minimally with Databricks Machine Learning Runtime 13.2 and an [NVIDIA T4 GPU](https://www.nvidia.com/en-us/data-center/tesla-t4/) ([A100](https://www.nvidia.com/en-us/data-center/a100/) is required for the steps involving VLLM).
+2. Configure the [init script](https://docs.databricks.com/en/init-scripts/index.html) for the cluster. Once you [clone this repo to your workspace](https://docs.databricks.com/en/repos/index.html), you can configure a init script by pointing to the following path in the Init Script configuration: `/Repos/your_name@email.com/databricks-llm-prompt-engineering/init/init.sh`
+3. Install the following Python packages in your cluster:
+```bash
+accelerate==0.21.0
+einops==0.6.1
+flash-attn==v1.0.5
+ninja
+tokenizers==0.13.3
+transformers==4.30.2
+xformers==0.0.20
+```
+4. Once all dependencies finish installing and your cluster has successfully started, you should be good to go.
+
+
    
 ## Coming soon
 
