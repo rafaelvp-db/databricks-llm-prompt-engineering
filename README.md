@@ -24,7 +24,7 @@ For this use case, there are 5 different notebooks:
 
 To start using this repo on Databricks, there are a few pre-requirements:
 
-1. Create a GPU Cluster, minimally with Databricks Machine Learning Runtime 13.2 and an [NVIDIA T4 GPU](https://www.nvidia.com/en-us/data-center/tesla-t4/) ([A100](https://www.nvidia.com/en-us/data-center/a100/) is required for the steps involving VLLM).
+1. Create a [GPU Cluster](https://learn.microsoft.com/en-us/azure/databricks/clusters/gpu), minimally with Databricks Machine Learning Runtime 13.2 and an [NVIDIA T4 GPU](https://www.nvidia.com/en-us/data-center/tesla-t4/) ([A100](https://www.nvidia.com/en-us/data-center/a100/) is required for the steps involving VLLM).
 2. Configure the [init script](https://docs.databricks.com/en/init-scripts/index.html) for the cluster. Once you [clone this repo to your workspace](https://docs.databricks.com/en/repos/index.html), you can configure a init script by pointing to the following path in the Init Script configuration: `/Repos/your_name@email.com/databricks-llm-prompt-engineering/init/init.sh`
 3. Install the following Python packages in your cluster:
 ```bash
