@@ -26,7 +26,7 @@ The repo is structured per different use cases. As of 18/08/2023, you will find 
 
 * `customer_service`
   * For this use case, there are 5 different notebooks:
-    * `00_hf_mlflow_crash_course``: provides a basic example using Hugging Face for training an intent classification model using `distilbert-qa`. Also showcases foundational concepts of MLflow, such as experiment tracking, artifact logging and model registration.
+    * `00_hf_mlflow_crash_course`: provides a basic example using Hugging Face for training an intent classification model using `distilbert-qa`. Also showcases foundational concepts of MLflow, such as experiment tracking, artifact logging and model registration.
     * `01_primer`: mostly conceptual notebook. Contains explanations around Prompt Engineering, and foundational concepts such as **Top K** sampling, **Top p** sampling and **Temperature**.
     * `02_basic_prompt_evaluation`: demonstrates basic Prompt Engineeering with lightweight LLM models. In addition to this, showcases MLflow's newest LLM features, such as `mlflow.evaluate()`.
     * `03_few_shot_learning`: here we explore Few Shot Learning for a sequence classification use case using MPT-Instruct-7b.
