@@ -24,9 +24,8 @@ To start using this repo on Databricks, there are a few pre-requirements:
 
 1. Create a [GPU Cluster](https://learn.microsoft.com/en-us/azure/databricks/clusters/gpu), minimally with [Databricks Machine Learning Runtime 13.2 GPU](https://docs.databricks.com/en/release-notes/runtime/13.2ml.html) and an [NVIDIA T4 GPU](https://www.nvidia.com/en-us/data-center/tesla-t4/) ([A100](https://www.nvidia.com/en-us/data-center/a100/) is required for the steps involving VLLM).
 2. Install CUDA additional dependencies
-<br/>
-   2.1 First, [clone this repo to your workspace](https://docs.databricks.com/en/repos/index.html)
-   2.2 Then, configure a init script in your cluster by pointing to the following path in the Init Script configuration: `/Repos/your_name@email.com/databricks-llm-prompt-engineering/init/init.sh`
+   * First, [clone this repo to your workspace](https://docs.databricks.com/en/repos/index.html)
+   * Then, configure an **init script** in your cluster by pointing to the following path in the Init Script configuration: `/Repos/your_name@email.com/databricks-llm-prompt-engineering/init/init.sh`
 4. Install the following Python packages in your cluster:
 ```bash
 accelerate==0.21.0
