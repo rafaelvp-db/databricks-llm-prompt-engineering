@@ -8,7 +8,7 @@
 
 The repo is structured per different use cases related to **Prompt Engineering** and **Large Language Models (LLMs)**.
 
-As of 18/08/2023, you will find the following examples in the `notebooks` folder:
+As of 29/08/2023, you will find the following examples in the `notebooks` folder:
 
 🙋🏻‍♂️ `customer_service`
 
@@ -19,6 +19,9 @@ As of 18/08/2023, you will find the following examples in the `notebooks` folder
 | `basic_prompt_evaluation`            | 🧪  Demonstrates basic Prompt Engineeering with lightweight LLM models. In addition to this, showcases [MLflow's newest LLM features](https://www.databricks.com/blog/announcing-mlflow-24-llmops-tools-robust-model-evaluation), such as `mlflow.evaluate()`.                                                                                                                                                                                                                                         |
 | `few_shot_learning`        | 💉 Here we explore [Few Shot Learning](https://blog.paperspace.com/few-shot-learning/) with an [Instruction Based LLM](https://blog.gopenai.com/an-introduction-to-base-and-instruction-tuned-large-language-models-8de102c785a6) ([mpt-7b-instruct](https://huggingface.co/mosaicml/mpt-7b-instruct)).                                                                                                                                                                                               |
 | `active_prompting`       | 🏃🏻‍♂️ In this notebook, we explore active learning techniques. Additionally, we demonstrate how to leverage [VLLM](https://vllm.readthedocs.io/en/latest/) in order to achieve 7X - 10X inference latency improvements.                                                                                                                                                                                                                                                                                  |
+| `llama2_mlflow_logging_inference`       | 🚀 Here we show how to log, register and deploy a LLaMA V2 model into MLflow                                                                                                                                                                                                                                                                                  |
+| `mpt_mlflow_logging_inference`       | 🚀 Here we show how to log, register and deploy an MPT model into MLflow                                                                                                                                                                                                                                                                                  |
+
 
 ## Getting Started
 
