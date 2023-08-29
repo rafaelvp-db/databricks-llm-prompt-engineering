@@ -53,3 +53,4 @@ xformers==0.0.20
 * [Getting Started with NLP using Hugging Face Transformers](https://www.databricks.com/blog/2023/02/06/getting-started-nlp-using-hugging-face-transformers-pipelines.html)
 * [DAIR.ai - Prompt Engineering Guide](https://www.promptingguide.ai/)
 * [Peter Cheng - Token Selection Strategies: Top-K, Top-p and Temperature](https://peterchng.com/blog/2023/05/02/token-selection-strategies-top-k-top-p-and-temperature/)
+* [Databricks ML Examples & LLM Models](https://github.com/databricks/databricks-ml-examples)

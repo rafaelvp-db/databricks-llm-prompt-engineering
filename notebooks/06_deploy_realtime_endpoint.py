@@ -36,19 +36,14 @@ class MPT(mlflow.pyfunc.PythonModel):
             "EleutherAI/gpt-neox-20b",
             padding_side="left"
         )
-        config = transformers.AutoConfig.from_pretrained(
-            "mosaicml/mpt-7b-instruct", 
-            trust_remote_code=True,
-            revision="bbe7a55d70215e16c00c1825805b81e4badb57d7"
-        )
         
         self.model = transformers.AutoModelForCausalLM.from_pretrained(
-            "mosaicml/mpt-7b-instruct", 
-            config=config,
+            "mosaicml/mpt-7b-instruct",
             torch_dtype=torch.bfloat16,
             trust_remote_code=True,
             revision="bbe7a55d70215e16c00c1825805b81e4badb57d7"
         )
+        
         self.model.to(device='cuda')
         
         self.model.eval()
