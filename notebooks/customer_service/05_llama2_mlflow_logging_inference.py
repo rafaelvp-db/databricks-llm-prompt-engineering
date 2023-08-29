@@ -151,38 +151,19 @@ with mlflow.start_run() as run:
 # COMMAND ----------
 
 # MAGIC %md
-# MAGIC ## Register the model to Unity Catalog
-# MAGIC  By default, MLflow registers models in the Databricks workspace model registry. To register models in Unity Catalog instead, we follow the [documentation](https://docs.databricks.com/machine-learning/manage-model-lifecycle/index.html) and set the registry server as Databricks Unity Catalog.
-# MAGIC
-# MAGIC  In order to register a model in Unity Catalog, there are [several requirements](https://docs.databricks.com/machine-learning/manage-model-lifecycle/index.html#requirements), such as Unity Catalog must be enabled in your workspace.
+# MAGIC ## Register the model to Model Registry
 # MAGIC
 
 # COMMAND ----------
 
-# Configure MLflow Python client to register model in Unity Catalog
-import mlflow
-mlflow.set_registry_uri("databricks-uc")
-
-# COMMAND ----------
-
-# Register model to Unity Catalog
 # This may take 2.2 minutes to complete
 
-registered_name = "models.default.llamav2_7b_chat_model" # Note that the UC model name follows the pattern <catalog_name>.<schema_name>.<model_name>, corresponding to the catalog, schema, and registered model name
-
+registered_name = "llamav2_7b_chat_model"
 
 result = mlflow.register_model(
     "runs:/"+run.info.run_id+"/model",
     registered_name,
 )
-
-# COMMAND ----------
-
-from mlflow import MlflowClient
-client = MlflowClient()
-
-# Choose the right model version registered in the above cell.
-client.set_registered_model_alias(name=registered_name, alias="Champion", version=result.version)
 
 # COMMAND ----------
 
@@ -194,7 +175,7 @@ client.set_registered_model_alias(name=registered_name, alias="Champion", versio
 import mlflow
 import pandas as pd
 
-loaded_model = mlflow.pyfunc.load_model(f"models:/{registered_name}@Champion")
+loaded_model = mlflow.pyfunc.load_model(f"models:/{registered_name}/latest")
 
 # Make a prediction using the loaded model
 loaded_model.predict(
@@ -257,8 +238,3 @@ if deploy_response.status_code != 200:
 # When first creating the serving endpoint, it should show that the state 'ready' is 'NOT_READY'
 # You can check the status on the Databricks model serving endpoint page, it is expected to take ~35 min for the serving endpoint to become ready
 print(deploy_response.json())
-
-# COMMAND ----------
-
-# MAGIC %md
-# MAGIC Once the model serving endpoint is ready, you can query it easily with LangChain (see `04_langchain` for example code) running in the same workspace.
