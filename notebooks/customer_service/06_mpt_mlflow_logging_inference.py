@@ -8,10 +8,6 @@
 
 # COMMAND ----------
 
-# MAGIC %pip install xformers==0.0.20 einops==0.6.1 flash-attn==v1.0.3.post0 triton-pre-mlir@git+https://github.com/vchiley/triton.git@triton_pre_mlir#subdirectory=python
-
-# COMMAND ----------
-
 # MAGIC %md
 # MAGIC ### Log the model to MLFlow
 
@@ -37,18 +33,24 @@ class MPT(mlflow.pyfunc.PythonModel):
         """
         # Initialize tokenizer and language model
         self.tokenizer = transformers.AutoTokenizer.from_pretrained(
-          context.artifacts['repository'], padding_side="left")
+          "EleutherAI/gpt-neox-20b", padding_side="left")
 
         config = transformers.AutoConfig.from_pretrained(
-            context.artifacts['repository'], 
+            "mosaicml/mpt-7b-instruct", 
             trust_remote_code=True
         )
+
+        #config.attn_config['attn_impl'] = 'triton'
+        config.init_device = 'cuda:0' # For fast initialization directly on GPU!
         
         self.model = transformers.AutoModelForCausalLM.from_pretrained(
-            context.artifacts['repository'], 
+            "mosaicml/mpt-7b-instruct", 
             config=config,
             torch_dtype=torch.bfloat16,
-            trust_remote_code=True)
+            trust_remote_code=True,
+            cache_dir="/local_disk0/.cache/huggingface/",
+            revision="bbe7a55d70215e16c00c1825805b81e4badb57d7"
+        )
         self.model.to(device='cuda')
         
         self.model.eval()
@@ -90,18 +92,6 @@ class MPT(mlflow.pyfunc.PythonModel):
 # COMMAND ----------
 
 # MAGIC %md
-# MAGIC Download the model
-
-# COMMAND ----------
-
-from huggingface_hub import snapshot_download
-
-# If the model has been downloaded in previous cells, this will not repetitively download large model files, but only the remaining files in the repo
-model_location = snapshot_download(repo_id="mosaicml/mpt-7b-instruct", cache_dir="/local_disk0/.cache/huggingface/", revision="bbe7a55d70215e16c00c1825805b81e4badb57d7")
-
-# COMMAND ----------
-
-# MAGIC %md
 # MAGIC Log the model to MLFlow
 
 # COMMAND ----------
@@ -129,8 +119,7 @@ with mlflow.start_run() as run:
     mlflow.pyfunc.log_model(
         "model",
         python_model=MPT(),
-        artifacts={'repository' : model_location},
-        pip_requirements=[f"torch=={torch.__version__}", 
+        pip_requirements=[f"torch==2.0.1", 
                           f"transformers=={transformers.__version__}", 
                           f"accelerate=={accelerate.__version__}", "einops", "sentencepiece"],
         input_example=input_example,
@@ -148,26 +137,9 @@ with mlflow.start_run() as run:
 # This may take about 6 minutes to complete
 result = mlflow.register_model(
     "runs:/"+run.info.run_id+"/model",
-    name="mpt-7b-instruct",
+    name="mpt-7b-instruct-rvp",
     await_registration_for=1000,
 )
-
-# COMMAND ----------
-
-# MAGIC %md
-# MAGIC ### Load the model from model registry
-# MAGIC Assume that the below code is run separately or after the memory cache is cleared.
-# MAGIC You may need to cleanup the GPU memory.
-
-# COMMAND ----------
-
-import mlflow
-import pandas as pd
-loaded_model = mlflow.pyfunc.load_model(f"models:/mpt-7b-instruct/latest")
-
-# Make a prediction using the loaded model
-input_example=pd.DataFrame({"prompt":["what is ML?", "Name 10 colors."], "temperature": [0.5, 0.2],"max_tokens": [100, 200]})
-print(loaded_model.predict(input_example))
 
 # COMMAND ----------
 
@@ -180,7 +152,7 @@ print(loaded_model.predict(input_example))
 # COMMAND ----------
 
 # Provide a name to the serving endpoint
-endpoint_name = 'mpt-7b-instruct-example'
+endpoint_name = 'mpt-7b-instruct-example-rvp2'
 
 # COMMAND ----------
 
@@ -224,5 +196,4 @@ print(deploy_response.json())
 
 # COMMAND ----------
 
-# MAGIC %md
-# MAGIC Once the model serving endpoint is ready, you can query it easily with LangChain (see `04_langchain` for example code) running in the same workspace.
+
