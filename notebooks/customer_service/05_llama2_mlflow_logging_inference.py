@@ -13,11 +13,6 @@
 
 # COMMAND ----------
 
-# MAGIC %pip install --upgrade "mlflow-skinny[databricks]>=2.4.1"
-# MAGIC dbutils.library.restartPython()
-
-# COMMAND ----------
-
 from huggingface_hub import notebook_login
 
 # Login to Huggingface to get access to the model
@@ -38,6 +33,10 @@ from huggingface_hub import snapshot_download
 
 # If the model has been downloaded in previous cells, this will not repetitively download large model files, but only the remaining files in the repo
 snapshot_location = snapshot_download(repo_id=model, revision=revision, ignore_patterns="*.safetensors*")
+
+# COMMAND ----------
+
+snapshot_location
 
 # COMMAND ----------
 
@@ -69,7 +68,8 @@ class Llama2(mlflow.pyfunc.PythonModel):
             low_cpu_mem_usage=True, 
             trust_remote_code=True,
             device_map="auto",
-            pad_token_id=self.tokenizer.eos_token_id)
+            pad_token_id=self.tokenizer.eos_token_id
+          )
         self.model.eval()
 
     def _build_prompt(self, instruction):
@@ -163,27 +163,7 @@ registered_name = "llamav2_7b_chat_model"
 result = mlflow.register_model(
     "runs:/"+run.info.run_id+"/model",
     registered_name,
-)
-
-# COMMAND ----------
-
-# MAGIC %md
-# MAGIC ## Load the model from Unity Catalog
-
-# COMMAND ----------
-
-import mlflow
-import pandas as pd
-
-loaded_model = mlflow.pyfunc.load_model(f"models:/{registered_name}/latest")
-
-# Make a prediction using the loaded model
-loaded_model.predict(
-    {
-        "prompt": ["What is ML?", "What is large language model?"],
-        "temperature": [0.1, 0.5],
-        "max_new_tokens": [100, 100],
-    }
+    await_registration_for=1200
 )
 
 # COMMAND ----------
