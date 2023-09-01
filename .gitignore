@@ -1,1 +1,6 @@
 intent_trainer
+.venv
+__pycache__
+.egg
+.whl
+.env
