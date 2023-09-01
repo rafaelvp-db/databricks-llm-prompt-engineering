@@ -20,3 +20,12 @@ python -m venv .venv
 gradio app.py
 ```
 8. If every went well, you should be able to load the Gradio app by firing up a browser window and entering the following URL: http://localhost:7861
+
+##### Sample Screenshot
+
+<img src="https://github.com/rafaelvp-db/databricks-llm-prompt-engineering/blob/main/frontend/img/gradio.png?raw=true" />
+
+#### Reference
+
+* [Gradio](https://www.gradio.app/)
+* [Databricks Model Serving](https://docs.databricks.com/en/machine-learning/model-serving/index.html)
