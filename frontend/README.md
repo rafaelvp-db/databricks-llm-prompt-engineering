@@ -4,7 +4,7 @@
 #### Instructions
 
 1. In your laptop, clone the repo https://github.com/rafaelvp-db/databricks-llm-prompt-engineering
-2. Inside the repo, go to the folder `frontend``
+2. Inside the repo, go to the folder `frontend`
 3. In a terminal window, create virtual environment by running:
 ```bash
 python -m venv .venv
