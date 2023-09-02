@@ -46,10 +46,12 @@ xformers==0.0.20
 ```
 4. Once all dependencies finish installing and your cluster has successfully started, you should be good to go.
    
-## Coming soon
+## Roadmap
 
 ~~🎨 Frontend Web App Using Gradio~~
+<br/>
 ~~🚀 [Model Deployment and Real Time Inference](https://docs.databricks.com/en/machine-learning/model-serving/index.html)~~
+</br>
 🔎 [Retrieval Augmented Generation (RAG)](https://www.promptingguide.ai/techniques/rag)
 🛣️ [MLflow AI Gateway](https://mlflow.org/docs/latest/gateway/index.html)
 
