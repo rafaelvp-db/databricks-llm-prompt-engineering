@@ -19,7 +19,6 @@ def generate(
         "inputs":
             {
                 "prompt": [message],
-                "max_new_tokens": [max_new_tokens],
                 "temperature": [temperature]
             }
     }
@@ -39,15 +38,20 @@ def generate(
         headers = headers,
         data = json.dumps(payload)
     )
-
-    return response.json()["predictions"]["candidates"][0]
+    logging.info(f"Response: {response.text}")
+    return response.json()["predictions"][0]["candidates"][0]["text"]
 
 
 def predict(message, history):
  
     logging.info(f"Message: {message}")
-    response = generate(message)
+    final_message = f"""
+    ### INSTRUCTION: {message}
+    ### RESPONSE:
+    """
+    response = generate(final_message)
     logging.info(f"Response: {response}")
+    response = response.split("INSTRUCTION")[0].split("\n")[0]
     return response
 
 gr.ChatInterface(predict).launch()
