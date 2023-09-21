@@ -1,6 +1,7 @@
 # Databricks notebook source
 # MAGIC %md
 # MAGIC # Manage MPT-7B-instruct model with MLFlow on Databricks
+# MAGIC <img src="https://promptengineeringdbl.blob.core.windows.net/img/header.png"/>
 # MAGIC
 # MAGIC Environment for this notebook:
 # MAGIC - Runtime: 13.2 GPU ML Runtime
