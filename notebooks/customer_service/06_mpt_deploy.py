@@ -1,7 +1,15 @@
 # Databricks notebook source
 # MAGIC %md
-# MAGIC # Manage MPT-7B-instruct model with MLFlow on Databricks
+# MAGIC ## Deploy MPT-7B-instruct model on Databricks Model Serving
+# MAGIC <hr/>
 # MAGIC <img src="https://promptengineeringdbl.blob.core.windows.net/img/header.png"/>
+# MAGIC
+# MAGIC <hr/>
+# MAGIC
+# MAGIC ## Overview
+# MAGIC
+# MAGIC * In this notebook, we deploy an **MPT 7B Instruct model** as a realtime serving endpoint using Databricks Model Serving.
+# MAGIC * Different from the LLaMA 2 Deployment notebook, here we create a custom `PythonModel` class that downloads the weights directly into the model endpoint once it is live.
 # MAGIC
 # MAGIC Environment for this notebook:
 # MAGIC - Runtime: 13.2 GPU ML Runtime

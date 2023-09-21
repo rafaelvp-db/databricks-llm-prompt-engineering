@@ -3,6 +3,7 @@
 # MAGIC
 # MAGIC ## Prompt Engineering Techniques
 # MAGIC ### Active Prompting & Chain-of-Thought (CoT)
+# MAGIC <hr/>
 # MAGIC <img src="https://promptengineeringdbl.blob.core.windows.net/img/header.png"/>
 # MAGIC <hr/>
 # MAGIC

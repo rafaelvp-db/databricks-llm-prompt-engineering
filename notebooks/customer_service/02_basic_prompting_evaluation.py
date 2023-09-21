@@ -2,9 +2,11 @@
 # MAGIC %md
 # MAGIC
 # MAGIC ## Basic Prompting & Evaluation
-# MAGIC <img src="https://weeueasyjetpovsa.blob.core.windows.net/img/Screenshot 2023-09-19 at 10.47.48.png"/>
+# MAGIC <hr/>
+# MAGIC <img src="https://promptengineeringdbl.blob.core.windows.net/img/header.png"/>
 # MAGIC
 # MAGIC <br/>
+# MAGIC <hr/>
 # MAGIC
 # MAGIC * Now that we know a bit more possible parameters used in LLMs, let's start with some basic Prompt Engineering experiments.
 # MAGIC * For this first part, we will use relatively lightweight LLMs - 1b parameters or less:
