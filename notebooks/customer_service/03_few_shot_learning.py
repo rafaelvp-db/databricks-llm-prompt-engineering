@@ -2,7 +2,7 @@
 # MAGIC %md
 # MAGIC
 # MAGIC ## Few Shot Learning
-# MAGIC <img src="https://weeueasyjetpovsa.blob.core.windows.net/img/Screenshot 2023-09-19 at 10.47.48.png"/>
+# MAGIC <img src="https://promptengineeringdbl.blob.core.windows.net/img/header.png"/>
 # MAGIC
 # MAGIC In Machine Learning, **Few Shot Learning** (FSL) is a Machine Learning framework that enables a pre-trained model to generalize over new categories of data (that the pre-trained model has not seen during training) using only a few labeled samples per class. It falls under the paradigm of meta-learning (meta-learning means learning to learn).
 # MAGIC
