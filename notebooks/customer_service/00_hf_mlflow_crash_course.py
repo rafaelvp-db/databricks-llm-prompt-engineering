@@ -1,6 +1,7 @@
 # Databricks notebook source
 # MAGIC %md
 # MAGIC # Tune a text classification model with Hugging Face Transformers
+# MAGIC <img src="https://weeueasyjetpovsa.blob.core.windows.net/img/Screenshot 2023-09-19 at 10.47.48.png"/>
 # MAGIC This notebook trains a sequence classification model with "distillibert-base-uncased" as the base model using the [🤗&nbsp;Transformers](https://huggingface.co/docs/transformers/index) library.
 # MAGIC
 # MAGIC ## Cluster setup
