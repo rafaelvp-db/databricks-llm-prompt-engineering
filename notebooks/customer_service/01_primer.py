@@ -4,7 +4,7 @@
 # MAGIC ## Prompt Engineering with LLMs on Databricks
 # MAGIC
 # MAGIC <hr />
-# MAGIC <img src="https://weeueasyjetpovsa.blob.core.windows.net/img/Screenshot 2023-09-19 at 10.47.48.png"/>
+# MAGIC <img src="https://promptengineeringdbl.blob.core.windows.net/img/header.png"/>
 # MAGIC <hr />
 # MAGIC <img src="https://imageio.forbes.com/specials-images/imageserve/645c8a0c17d25e16f92796dd/0x0.jpg?format=jpg&width=1200" />
 # MAGIC
