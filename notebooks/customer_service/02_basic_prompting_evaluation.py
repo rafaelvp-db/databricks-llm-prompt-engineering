@@ -2,6 +2,7 @@
 # MAGIC %md
 # MAGIC
 # MAGIC ## Basic Prompting & Evaluation
+# MAGIC <img src="https://weeueasyjetpovsa.blob.core.windows.net/img/Screenshot 2023-09-19 at 10.47.48.png"/>
 # MAGIC
 # MAGIC <br/>
 # MAGIC
