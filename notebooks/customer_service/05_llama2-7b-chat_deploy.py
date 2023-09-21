@@ -1,4 +1,10 @@
 # Databricks notebook source
+# MAGIC %md
+# MAGIC ## Deploy LLaMa 2 Chat Model on Databricks Model Serving
+# MAGIC <img src="https://promptengineeringdbl.blob.core.windows.net/img/header.png"/>
+
+# COMMAND ----------
+
 !pip install --upgrade transformers
 !pip install --upgrade accelerate
 !pip install --upgrade mlflow
